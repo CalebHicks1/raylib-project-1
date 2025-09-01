@@ -2,6 +2,7 @@
 #include "world.h"
 #include "game_state.h"
 #include <stdlib.h>
+#include "camera.h"
 /*
 Given a room width/height, generate a tile map for the room and set it as the game's roomTiles
 */
@@ -34,9 +35,23 @@ void drawRoomTiles(GameState *game)
             // get current tile
             Tile *tile = &GET_TILE(game, x, y);
             // draw border
+
+            Vector2 MousePos = GetMousePosition();
+            Vector2 MousePosInWorld = GetScreenToWorld2D(MousePos, game->playerCamera->camera);
+            Rectangle tileRec = {tile->position.x, tile->position.y, game->tileSize, game->tileSize};
+            // draw rectangle outline
             DrawRectangle(tile->position.x, tile->position.y, game->tileSize, game->tileSize, RAYWHITE);
             // draw inner area
-            DrawRectangle(tile->position.x + 1, tile->position.y + 1, game->tileSize - 2, game->tileSize - 2, GetTileColor(tile->tileType));
+            if (CheckCollisionPointRec(MousePosInWorld, tileRec))
+            {
+                // if the mouse is in this tile, color it red
+                DrawRectangle(tile->position.x + 1, tile->position.y + 1, game->tileSize - 2, game->tileSize - 2, RED);
+            }
+            else
+            {
+                // otherwise, use tile type for color
+                DrawRectangle(tile->position.x + 1, tile->position.y + 1, game->tileSize - 2, game->tileSize - 2, GetTileColor(tile->tileType));
+            }
         }
     }
 }

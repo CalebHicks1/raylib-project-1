@@ -68,9 +68,13 @@ void drawGame(GameState *game)
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, RED);
 
     // Anything after EndMode2D() will be drawn outside of the camera (Like the UI)
+    // Vector2 MousePos = GetMousePosition();
+    // Vector2 MousePosInWorld = GetScreenToWorld2D(MousePos, game->playerCamera->camera);
+    // DrawRectangle(MousePosInWorld.x, MousePosInWorld.y, game->player->playerSize.x, game->player->playerSize.y, BLUE);
     EndMode2D();
 
     // draw ui
+
     DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
 
     DrawFPS(10, 10);
