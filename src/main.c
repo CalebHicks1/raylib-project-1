@@ -43,26 +43,11 @@ int main()
 void updateGame(GameState *game)
 {
     // get time since last frame
-    float deltaTime = GetFrameTime();
-    // reset player's target velocity
-    game->player->playerTargetVelocity = (Vector2){0.0f, 0.0f};
-    // read keypresses for player direction
-    Vector2 direction = getPlayerDirection();
+    game->deltaTime = GetFrameTime();
 
-    game->player->playerTargetVelocity.x = game->player->playerSpeed * direction.x;
-    game->player->playerTargetVelocity.y = game->player->playerSpeed * direction.y;
-    // update player
-    float playerAccelTime = 0.09f;
-    game->player->playerVelocity.x = Lerp(game->player->playerVelocity.x, game->player->playerTargetVelocity.x, playerAccelTime);
-    game->player->playerVelocity.y = Lerp(game->player->playerVelocity.y, game->player->playerTargetVelocity.y, playerAccelTime);
-
-    game->player->playerPos.x += (game->player->playerVelocity.x * deltaTime);
-    game->player->playerPos.y += (game->player->playerVelocity.y * deltaTime);
+    updatePlayer(game);
     // update camera
-    float camFollowSpeed = 0.02f;
-    game->playerCamera->camPos.x = Lerp(game->playerCamera->camPos.x, game->player->playerPos.x, camFollowSpeed);
-    game->playerCamera->camPos.y = Lerp(game->playerCamera->camPos.y, game->player->playerPos.y, camFollowSpeed);
-    game->playerCamera->camera.target = game->playerCamera->camPos;
+    updateCamera(game);
 }
 
 void drawGame(GameState *game)

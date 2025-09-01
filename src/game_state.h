@@ -14,6 +14,7 @@ typedef struct GameState
     PlayerCamera *playerCamera;
     int screenWidth;
     int screenHeight;
+    float deltaTime;
 } GameState;
 // Functions
 void InitGame(GameState *game);

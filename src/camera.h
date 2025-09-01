@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include "game_state.h"
+
 // Structs
 typedef struct PlayerCamera
 {
@@ -11,4 +12,5 @@ typedef struct PlayerCamera
 } PlayerCamera;
 
 // Functions
+void updateCamera(GameState *game);
 #endif

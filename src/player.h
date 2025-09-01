@@ -16,5 +16,6 @@ typedef struct Player
 
 // Functions
 Vector2 getPlayerDirection();
+void updatePlayer(GameState *game);
 
 #endif

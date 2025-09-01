@@ -38,3 +38,24 @@ Vector2 getPlayerDirection()
 
     return direction;
 }
+
+void updatePlayer(GameState *game)
+{
+    // reset player's target velocity
+    game->player->playerTargetVelocity = (Vector2){0.0f, 0.0f};
+    // read keypresses for player direction
+    Vector2 direction = getPlayerDirection();
+
+    // update the player's target velocity
+    game->player->playerTargetVelocity.x = game->player->playerSpeed * direction.x;
+    game->player->playerTargetVelocity.y = game->player->playerSpeed * direction.y;
+
+    // lerp the player's actual velocity towards the target velocity
+    float playerAccelTime = 0.09f;
+    game->player->playerVelocity.x = Lerp(game->player->playerVelocity.x, game->player->playerTargetVelocity.x, playerAccelTime);
+    game->player->playerVelocity.y = Lerp(game->player->playerVelocity.y, game->player->playerTargetVelocity.y, playerAccelTime);
+
+    // update the player's position
+    game->player->playerPos.x += (game->player->playerVelocity.x * game->deltaTime);
+    game->player->playerPos.y += (game->player->playerVelocity.y * game->deltaTime);
+}
