@@ -46,6 +46,30 @@ void updateGame(GameState *game)
     // get time since last frame
     game->deltaTime = GetFrameTime();
 
+    // Handle tile clicking
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 mousePos = GetMousePosition();
+        Vector2 mousePosInWorld = GetScreenToWorld2D(mousePos, game->playerCamera->camera);
+
+        // Convert world position to tile coordinates
+        int tileX = (int)(mousePosInWorld.x / game->tileSize);
+        int tileY = (int)(mousePosInWorld.y / game->tileSize);
+
+        // Check if tile coordinates are valid
+        if (tileX >= 0 && tileX < game->roomWidth &&
+            tileY >= 0 && tileY < game->roomHeight)
+        {
+            Tile *clickedTile = &GET_TILE(game, tileX, tileY);
+
+            // Toggle between floor and wall
+            if (clickedTile->tileType == TILE_FLOOR)
+                clickedTile->tileType = TILE_WALL;
+            else if (clickedTile->tileType == TILE_WALL)
+                clickedTile->tileType = TILE_FLOOR;
+        }
+    }
+
     updatePlayer(game);
     // update camera
     updateCamera(game);

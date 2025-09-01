@@ -10,6 +10,7 @@
 typedef enum TileType
 {
     TILE_FLOOR = 0,
+    TILE_WALL = 1,
     TILE_COUNT // Always keep this last - gives us total count
 } TileType;
 
@@ -24,7 +25,8 @@ typedef struct TileProperties
 
 // Static tile definitions
 static const TileProperties TILE_DEFINITIONS[TILE_COUNT] = {
-    [TILE_FLOOR] = {TILE_FLOOR, DARKGREEN, false, "Grass"}};
+    [TILE_FLOOR] = {TILE_FLOOR, DARKGREEN, false, "Floor"},
+    [TILE_WALL] = {TILE_WALL, DARKGRAY, false, "Wall"}};
 
 // Tile: one tile of the world map
 typedef struct Tile

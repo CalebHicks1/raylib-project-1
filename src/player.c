@@ -3,7 +3,7 @@
 #include "player.h"
 #include "game_state.h"
 
-/**
+/*
  * Reads keypresses for player direction. Normalizes the vector before returning
  */
 Vector2 getPlayerDirection()
