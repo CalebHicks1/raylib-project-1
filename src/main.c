@@ -6,6 +6,7 @@
 #include "player.h"
 #include "camera.h"
 #include "game_state.h"
+#include "world.h"
 
 void updateGame(GameState *game);
 void drawGame(GameState *game);
@@ -54,16 +55,19 @@ void drawGame(GameState *game)
 {
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
     // BeginMode3D(camera);
 
     // draw anything subject to camera
     BeginMode2D(game->playerCamera->camera);
 
+    // draw room tiles
+    drawRoomTiles(game);
+
     // draw player
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, RED);
-    // draw rect
-    DrawRectangle(50, 50, 50, 50, BLUE);
+
+    // Anything after EndMode2D() will be drawn outside of the camera (Like the UI)
     EndMode2D();
 
     // draw ui

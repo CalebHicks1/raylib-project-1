@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "player.h"
 #include <stdlib.h>
+#include "world.h"
 
 void InitGame(GameState *game)
 {
@@ -10,12 +11,15 @@ void InitGame(GameState *game)
     // init player before camera, as the camera requires some player info
     InitPlayer(game);
     InitCamera(game);
+    game->tileSize = 32;
+    loadRoomTiles(game, 32, 32);
 }
 
 void FreeGame(GameState *game)
 {
     free(game->playerCamera);
     free(game->player);
+    free(game->roomTiles);
 }
 
 void InitCamera(GameState *game)
