@@ -7,8 +7,8 @@
 // Structs
 typedef struct PlayerCamera
 {
-    Camera2D camera;
-    Vector2 camPos;
+    Camera2D camera; // raylib camera
+    Vector2 camPos;  // position for the camera
 } PlayerCamera;
 
 // Functions

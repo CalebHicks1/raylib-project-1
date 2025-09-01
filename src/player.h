@@ -7,11 +7,11 @@
 // Structs
 typedef struct Player
 {
-    Vector2 playerPos;
-    Vector2 playerSize;
-    float playerSpeed;
-    Vector2 playerVelocity;
-    Vector2 playerTargetVelocity;
+    Vector2 playerPos;            // position of the player in the world.
+    Vector2 playerSize;           // size of the player rect
+    float playerSpeed;            // max walking speed
+    Vector2 playerVelocity;       // current velocity
+    Vector2 playerTargetVelocity; // target velocity (used to lerp current to max)
 } Player;
 
 // Functions

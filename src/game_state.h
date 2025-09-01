@@ -10,11 +10,11 @@ typedef struct PlayerCamera PlayerCamera;
 // Structs
 typedef struct GameState
 {
-    Player *player;
-    PlayerCamera *playerCamera;
+    Player *player;             // player struct. defined in player.h
+    PlayerCamera *playerCamera; // player camera struct. defined in camera.h
     int screenWidth;
     int screenHeight;
-    float deltaTime;
+    float deltaTime; // time since last frame
 } GameState;
 // Functions
 void InitGame(GameState *game);
