@@ -7,21 +7,6 @@
 // Forward declarations
 
 // Structs
-typedef enum TileType
-{
-    TILE_FLOOR = 0,
-    TILE_WALL = 1,
-    TILE_COUNT // Always keep this last - gives us total count
-} TileType;
-
-// Tile properties structure
-typedef struct TileProperties
-{
-    TileType type;
-    Color color;
-    bool isSolid; // can this be collided with
-    const char *name;
-} TileProperties;
 
 // Static tile definitions
 static const TileProperties TILE_DEFINITIONS[TILE_COUNT] = {

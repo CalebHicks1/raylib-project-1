@@ -11,7 +11,11 @@ void InitGame(GameState *game)
     // init player before camera, as the camera requires some player info
     InitPlayer(game);
     InitCamera(game);
+
+    // init tile info
     game->tileSize = 32;
+    game->tileTextures[TILE_WALL] = LoadTexture("resources/wall.png");
+    game->tileTextures[TILE_FLOOR] = LoadTexture("resources/floor.png");
     loadRoomTiles(game, 32, 32);
 }
 
