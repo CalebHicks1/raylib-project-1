@@ -34,7 +34,7 @@ void InitCamera(GameState *game)
     game->playerCamera->camPos = (Vector2){0.0f, 0.0f};
     // center the camera on the player
     game->playerCamera->camera.offset = (Vector2){(game->screenWidth / 2) - (game->player->playerSize.x / 2), (game->screenHeight / 2) - (game->player->playerSize.y / 2)};
-    game->playerCamera->camera.zoom = 1;
+    game->playerCamera->camera.zoom = 2;
 }
 
 void InitPlayer(GameState *game)

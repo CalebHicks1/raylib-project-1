@@ -21,6 +21,14 @@ typedef struct Tile
 
 } Tile;
 
+typedef struct TileCorners
+{
+    Rectangle topLeft;
+    Rectangle topRight;
+    Rectangle bottomLeft;
+    Rectangle bottomRight;
+} TileCorners;
+
 // Functions
 void loadRoomTiles(GameState *game, int roomWidth, int roomHeight);
 void drawRoomTiles(GameState *game);
