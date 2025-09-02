@@ -28,25 +28,222 @@ void loadRoomTiles(GameState *game, int roomWidth, int roomHeight)
         }
     }
 }
+typedef enum Direction
+{
+    DIRECTION_NORTH = 0,
+    DIRECTION_EAST = 1,
+    DIRECTION_SOUTH = 2,
+    DIRECTION_WEST = 3
+} Direction;
+/*
+    0 = north
+    1 = east
+    2 = sout
+    3 = west
+*/
+bool hasNeighbor(GameState *game, Tile *tile, Direction direction)
+{
+    // Get tile coordinates
+    int tileX = (int)(tile->position.x / game->tileSize);
+    int tileY = (int)(tile->position.y / game->tileSize);
+
+    // Calculate neighbor coordinates
+    int neighborX = tileX;
+    int neighborY = tileY;
+
+    switch (direction)
+    {
+    case DIRECTION_NORTH:
+        neighborY -= 1;
+        break;
+    case DIRECTION_EAST:
+        neighborX += 1;
+        break;
+    case DIRECTION_SOUTH:
+        neighborY += 1;
+        break;
+    case DIRECTION_WEST:
+        neighborX -= 1;
+        break;
+    }
+
+    // Check bounds
+    if (neighborX < 0 || neighborX >= game->roomWidth ||
+        neighborY < 0 || neighborY >= game->roomHeight)
+    {
+        return false; // Out of bounds
+    }
+
+    // Check if neighbor tile exists and is the same type
+    Tile *neighborTile = &GET_TILE(game, neighborX, neighborY);
+    return (neighborTile->tileType == tile->tileType);
+}
+
+bool hasNeighborDiagonal(GameState *game, Tile *tile, Direction dir1, Direction dir2)
+{
+    // Get tile coordinates
+    int tileX = (int)(tile->position.x / game->tileSize);
+    int tileY = (int)(tile->position.y / game->tileSize);
+
+    int neighborX = tileX;
+    int neighborY = tileY;
+
+    // Apply both direction offsets
+    if (dir1 == DIRECTION_NORTH || dir2 == DIRECTION_NORTH)
+        neighborY -= 1;
+    if (dir1 == DIRECTION_SOUTH || dir2 == DIRECTION_SOUTH)
+        neighborY += 1;
+    if (dir1 == DIRECTION_EAST || dir2 == DIRECTION_EAST)
+        neighborX += 1;
+    if (dir1 == DIRECTION_WEST || dir2 == DIRECTION_WEST)
+        neighborX -= 1;
+
+    // Check bounds
+    if (neighborX < 0 || neighborX >= game->roomWidth ||
+        neighborY < 0 || neighborY >= game->roomHeight)
+    {
+        return false;
+    }
+
+    Tile *neighborTile = &GET_TILE(game, neighborX, neighborY);
+    return (neighborTile->tileType == tile->tileType);
+}
 
 /*
 Given a tile, return tile frames to render the 4 corners of the tile
 */
 TileCorners getTileFrames(GameState *game, Tile *tile)
 {
-    // size of the pieces of the tilemap
-    int edgeSize = game->tileSize / 4;
-    // default
-    TileCorners result = {
-        {0 * edgeSize, 0 * edgeSize, edgeSize, edgeSize},
-        {5 * edgeSize, 0 * edgeSize, edgeSize, edgeSize},
-        {0 * edgeSize, 5 * edgeSize, edgeSize, edgeSize},
-        {5 * edgeSize, 5 * edgeSize, edgeSize, edgeSize}};
+    int edgeSize = 16 / 2; // tileset uses 16 pixels, and each corner of a tile is 8x8
+
+    // Check all 8 neighbors (including diagonals)
+    bool hasNorth = hasNeighbor(game, tile, DIRECTION_NORTH);
+    bool hasEast = hasNeighbor(game, tile, DIRECTION_EAST);
+    bool hasSouth = hasNeighbor(game, tile, DIRECTION_SOUTH);
+    bool hasWest = hasNeighbor(game, tile, DIRECTION_WEST);
+
+    // Check diagonal neighbors
+    bool hasNorthWest = hasNeighborDiagonal(game, tile, DIRECTION_NORTH, DIRECTION_WEST);
+    bool hasNorthEast = hasNeighborDiagonal(game, tile, DIRECTION_NORTH, DIRECTION_EAST);
+    bool hasSouthWest = hasNeighborDiagonal(game, tile, DIRECTION_SOUTH, DIRECTION_WEST);
+    bool hasSouthEast = hasNeighborDiagonal(game, tile, DIRECTION_SOUTH, DIRECTION_EAST);
+
+    TileCorners result;
+
+    // TOP LEFT CORNER
+    if (!hasNorth && !hasWest)
+    {
+        // Isolated corner
+        result.topLeft = (Rectangle){0, 0, edgeSize, edgeSize};
+    }
+    else if (hasNorth && !hasWest)
+    {
+        // North edge
+        result.topLeft = (Rectangle){0, edgeSize, edgeSize, edgeSize};
+    }
+    else if (!hasNorth && hasWest)
+    {
+        // West edge
+        result.topLeft = (Rectangle){edgeSize, 0, edgeSize, edgeSize};
+    }
+    else if (hasNorth && hasWest && !hasNorthWest)
+    {
+        // Inner corner (concave)
+        result.topLeft = (Rectangle){8 * edgeSize, 2 * edgeSize, edgeSize, edgeSize};
+    }
+    else
+    {
+        // Fully connected
+        result.topLeft = (Rectangle){edgeSize, edgeSize, edgeSize, edgeSize};
+    }
+
+    // TOP RIGHT CORNER
+    if (!hasNorth && !hasEast)
+    {
+        // Isolated corner
+        result.topRight = (Rectangle){5 * edgeSize, 0, edgeSize, edgeSize};
+    }
+    else if (hasNorth && !hasEast)
+    {
+        // North edge
+        result.topRight = (Rectangle){5 * edgeSize, edgeSize, edgeSize, edgeSize};
+    }
+    else if (!hasNorth && hasEast)
+    {
+        // East edge
+        result.topRight = (Rectangle){4 * edgeSize, 0, edgeSize, edgeSize};
+    }
+    else if (hasNorth && hasEast && !hasNorthEast)
+    {
+        // Inner corner (concave)
+        result.topRight = (Rectangle){7 * edgeSize, 2 * edgeSize, edgeSize, edgeSize};
+    }
+    else
+    {
+        // Fully connected
+        result.topRight = (Rectangle){4 * edgeSize, edgeSize, edgeSize, edgeSize};
+    }
+
+    // BOTTOM LEFT CORNER
+    if (!hasSouth && !hasWest)
+    {
+        // Isolated corner
+        result.bottomLeft = (Rectangle){0, 5 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (hasSouth && !hasWest)
+    {
+        // South edge
+        result.bottomLeft = (Rectangle){0, 4 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (!hasSouth && hasWest)
+    {
+        // West edge
+        result.bottomLeft = (Rectangle){edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (hasSouth && hasWest && !hasSouthWest)
+    {
+        // Inner corner (concave)
+        result.bottomLeft = (Rectangle){8 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
+    }
+    else
+    {
+        // Fully connected
+        result.bottomLeft = (Rectangle){edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+    }
+
+    // BOTTOM RIGHT CORNER
+    if (!hasSouth && !hasEast)
+    {
+        // Isolated corner
+        result.bottomRight = (Rectangle){5 * edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (hasSouth && !hasEast)
+    {
+        // South edge
+        result.bottomRight = (Rectangle){5 * edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (!hasSouth && hasEast)
+    {
+        // East edge
+        result.bottomRight = (Rectangle){4 * edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+    }
+    else if (hasSouth && hasEast && !hasSouthEast)
+    {
+        // Inner corner (concave)
+        result.bottomRight = (Rectangle){7 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
+    }
+    else
+    {
+        // Fully connected
+        result.bottomRight = (Rectangle){4 * edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+    }
+
     return result;
 }
 
 void drawRoomTiles(GameState *game)
 {
+    // actual size of the texture
     Rectangle sourceRect = {0, 0, 16, 16};
     for (int x = 0; x < game->roomWidth; x++)
     {
@@ -66,35 +263,31 @@ void drawRoomTiles(GameState *game)
             // }
             // draw each corner of the tile
             // only for walls
-            Texture2D tileTexture = game->tileTextures[tile->tileType];
+            Texture2D tileTexture = game->tileTextures[TILE_FLOOR];
+            Rectangle destRect = {tile->position.x, tile->position.y, game->tileSize, game->tileSize};
+            // DrawTexturePro allows us to scale the sprite to the dest size
+            DrawTexturePro(tileTexture, sourceRect, destRect, (Vector2){0, 0}, 0, WHITE);
             if (tile->tileType == TILE_WALL)
             {
+                Texture2D wallTexture = game->tileTextures[TILE_WALL];
                 TileCorners sourceTiles = getTileFrames(game, tile);
                 // top left
                 Rectangle topLeftSourceRect = sourceTiles.topLeft;
                 Rectangle topLeftDestRect = {tile->position.x, tile->position.y, game->tileSize / 2, game->tileSize / 2};
-                DrawTexturePro(tileTexture, topLeftSourceRect, topLeftDestRect, (Vector2){0, 0}, 0, WHITE);
+                DrawTexturePro(wallTexture, topLeftSourceRect, topLeftDestRect, (Vector2){0, 0}, 0, WHITE);
                 // top right
                 Rectangle topRightSourceRect = sourceTiles.topRight;
                 Rectangle topRightDestRect = {tile->position.x + game->tileSize / 2, tile->position.y, game->tileSize / 2, game->tileSize / 2};
-                DrawTexturePro(tileTexture, topRightSourceRect, topRightDestRect, (Vector2){0, 0}, 0, WHITE);
+                DrawTexturePro(wallTexture, topRightSourceRect, topRightDestRect, (Vector2){0, 0}, 0, WHITE);
                 // bottom Left
                 Rectangle bottomLeftSourceRect = sourceTiles.bottomLeft;
                 Rectangle bottomLeftDestRect = {tile->position.x, tile->position.y + game->tileSize / 2, game->tileSize / 2, game->tileSize / 2};
-                DrawTexturePro(tileTexture, bottomLeftSourceRect, bottomLeftDestRect, (Vector2){0, 0}, 0, WHITE);
+                DrawTexturePro(wallTexture, bottomLeftSourceRect, bottomLeftDestRect, (Vector2){0, 0}, 0, WHITE);
                 // bottom Right
                 Rectangle bottomRightSourceRect = sourceTiles.bottomRight;
                 Rectangle bottomRightDestRect = {tile->position.x + game->tileSize / 2, tile->position.y + game->tileSize / 2, game->tileSize / 2, game->tileSize / 2};
-                DrawTexturePro(tileTexture, bottomRightSourceRect, bottomRightDestRect, (Vector2){0, 0}, 0, WHITE);
+                DrawTexturePro(wallTexture, bottomRightSourceRect, bottomRightDestRect, (Vector2){0, 0}, 0, WHITE);
             }
-            else
-            {
-                Rectangle sourceRect = {0, 0, game->tileSize, game->tileSize};
-                Rectangle destRect = {tile->position.x, tile->position.y, game->tileSize, game->tileSize};
-                DrawTexturePro(tileTexture, sourceRect, destRect, (Vector2){0, 0}, 0, WHITE);
-            }
-
-            // DrawTexturePro allows us to scale the sprite to the dest size
         }
     }
 }
