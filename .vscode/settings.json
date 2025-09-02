@@ -13,6 +13,7 @@
 		"game_state.h": "c",
 		"raylib.h": "c",
 		"camera.h": "c",
-		"second.h": "c"
+		"second.h": "c",
+		"raymath.h": "c"
 	}
 }

@@ -15,6 +15,7 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+    // window and game init
     const int screenWidth = 800;
     const int screenHeight = 450;
     GameState game = {0};
@@ -23,6 +24,12 @@ int main()
     InitWindow(screenWidth, screenHeight, "raylib");
     InitGame(&game);
     SetTargetFPS(144); // Set our game to run at 60 frames-per-second
+    // shaders
+    Shader spotlightShader = LoadShader(0, "resources/shaders/spotlight.fs");
+    float lightPosLoc = GetShaderLocation(spotlightShader, "lightPos");
+    Vector2 lightPos = {0, 0};
+    SetShaderValue(spotlightShader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC2);
+    game.spotlightShader = spotlightShader;
     //--------------------------------------------------------------------------------------
 
     // Main game loop
@@ -30,6 +37,9 @@ int main()
     {
         // Update
         updateGame(&game);
+        Vector2 playerScreenPos = GetWorldToScreen2D(Vector2Add(game.player->playerPos, Vector2Scale(game.player->playerSize, 0.5)), game.playerCamera->camera);
+        SetShaderValue(spotlightShader, lightPosLoc, &playerScreenPos, SHADER_UNIFORM_VEC2);
+
         // Draw
         drawGame(&game);
     }
@@ -96,6 +106,11 @@ void drawGame(GameState *game)
     // Vector2 MousePosInWorld = GetScreenToWorld2D(MousePos, game->playerCamera->camera);
     // DrawRectangle(MousePosInWorld.x, MousePosInWorld.y, game->player->playerSize.x, game->player->playerSize.y, BLUE);
     EndMode2D();
+
+    // draw a rectangle with cutouts where light is
+    BeginShaderMode(game->spotlightShader);
+    DrawRectangle(0, 0, game->screenWidth, game->screenHeight, WHITE);
+    EndShaderMode();
 
     // draw ui
 

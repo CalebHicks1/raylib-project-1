@@ -37,6 +37,7 @@ typedef struct GameState
     int roomWidth;                      // width of the current room
     int roomHeight;                     // height of the current room
     Texture2D tileTextures[TILE_COUNT]; // textures for each tile type, indexed by TILE_TYPE
+    Shader spotlightShader;
 } GameState;
 
 // Helper macro to access tiles like a 2D array
