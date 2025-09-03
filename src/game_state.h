@@ -7,6 +7,7 @@
 typedef struct Player Player;
 typedef struct PlayerCamera PlayerCamera;
 typedef struct Tile Tile;
+typedef struct Edge Edge;
 
 // Structs
 typedef enum TileType
@@ -24,18 +25,27 @@ typedef struct TileProperties
     bool isSolid; // can this be collided with
     const char *name;
 } TileProperties;
-
+typedef struct Triangle
+{
+    Vector2 point1;
+    Vector2 point2;
+    Vector2 point3;
+} Triangle;
 typedef struct GameState
 {
     Player *player;             // player struct. defined in player.h
     PlayerCamera *playerCamera; // player camera struct. defined in camera.h
     int screenWidth;
     int screenHeight;
-    float deltaTime;                    // time since last frame
-    int tileSize;                       // length of the side of one tile, in pixels
-    Tile *roomTiles;                    // single 1D array
-    int roomWidth;                      // width of the current room
-    int roomHeight;                     // height of the current room
+    float deltaTime;   // time since last frame
+    int tileSize;      // length of the side of one tile, in pixels
+    Tile *roomTiles;   // single 1D array
+    Edge *roomEdges;   // edges in the room, calculated from wall tiles
+    int roomEdgeCount; // number of edges in the room (starting at 0)
+    int roomWidth;     // width of the current room
+    int roomHeight;    // height of the current room
+    Triangle *triangles;
+    int triangleCount;
     Texture2D tileTextures[TILE_COUNT]; // textures for each tile type, indexed by TILE_TYPE
     Shader spotlightShader;
 } GameState;

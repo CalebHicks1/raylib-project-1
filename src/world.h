@@ -29,10 +29,26 @@ typedef struct TileCorners
     Rectangle bottomRight;
 } TileCorners;
 
+typedef struct Edge
+{
+    bool visited;
+    Vector2 start;
+    Vector2 end;
+} Edge;
+
+typedef struct TileEdges
+{
+    bool isWall;
+    int northEdgeId;
+    int southEdgeId;
+    int eastEdgeId;
+    int westEdgeId;
+} TileEdges;
+
 // Functions
 void loadRoomTiles(GameState *game, int roomWidth, int roomHeight);
 void drawRoomTiles(GameState *game);
-
+void roomTilesToRoomLines(GameState *game);
 // Helper functions
 static inline TileProperties GetTileProperties(TileType type)
 {
