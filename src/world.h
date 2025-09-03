@@ -32,10 +32,8 @@ typedef struct TileCorners
 typedef struct Edge
 {
     bool visited;
-    int startX; // x coord in screenspace
-    int startY;
-    int endX;
-    int endY;
+    Vector2 start;
+    Vector2 end;
 } Edge;
 
 typedef struct TileEdges

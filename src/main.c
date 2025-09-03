@@ -103,9 +103,9 @@ void drawGame(GameState *game)
     for (int i = 0; i < game->roomEdgeCount; i++)
     {
         Edge currEdge = game->roomEdges[i];
-        DrawCircle(currEdge.startX, currEdge.startY, 5, RED);
-        DrawCircle(currEdge.endX, currEdge.endY, 5, RED);
-        DrawLine(currEdge.startX, currEdge.startY, currEdge.endX, currEdge.endY, RED);
+        DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
+        DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
+        DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
     }
 
     // draw player
