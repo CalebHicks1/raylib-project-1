@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "game_state.h"
 #include "world.h"
+#include "ray_casting.h"
 
 void updateGame(GameState *game);
 void drawGame(GameState *game);
@@ -99,17 +100,21 @@ void drawGame(GameState *game)
     // draw room tiles
     drawRoomTiles(game);
 
+    // Calculate and draw sight polygon
+    Triangle *sight = calculatePlayerSight(game, 350.0f); // 300 pixel sight range
+    drawSightPolygon(game, ColorAlpha(YELLOW, 0.3f));
+
     // draw edge visualizations
     for (int i = 0; i < game->roomEdgeCount; i++)
     {
         Edge currEdge = game->roomEdges[i];
-        DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
-        DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
+        // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
+        // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
         DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
     }
 
     // draw player
-    DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, RED);
+    DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, WHITE);
 
     // Anything after EndMode2D() will be drawn outside of the camera (Like the UI)
     // Vector2 MousePos = GetMousePosition();

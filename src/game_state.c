@@ -16,6 +16,7 @@ void InitGame(GameState *game)
     game->tileSize = 32;
     game->tileTextures[TILE_WALL] = LoadTexture("resources/wall.png");
     game->tileTextures[TILE_FLOOR] = LoadTexture("resources/floor.png");
+
     loadRoomTiles(game, 32, 32);
     // calculate edges of tiles
     roomTilesToRoomLines(game);
