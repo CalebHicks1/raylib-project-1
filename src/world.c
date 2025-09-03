@@ -509,6 +509,6 @@ void roomTilesToRoomLines(GameState *game)
         }
     }
     game->roomEdges = edges;
-    game->roomEdgeCount = edgeIndex + 1;
+    game->roomEdgeCount = edgeIndex;
     free(visitedTiles);
 }

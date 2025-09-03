@@ -77,10 +77,9 @@ void updateGame(GameState *game)
                 clickedTile->tileType = TILE_WALL;
             else if (clickedTile->tileType == TILE_WALL)
                 clickedTile->tileType = TILE_FLOOR;
+            roomTilesToRoomLines(game);
         }
     }
-
-    roomTilesToRoomLines(game);
 
     updatePlayer(game);
     // update camera
@@ -106,6 +105,7 @@ void drawGame(GameState *game)
         Edge currEdge = game->roomEdges[i];
         DrawCircle(currEdge.startX, currEdge.startY, 5, RED);
         DrawCircle(currEdge.endX, currEdge.endY, 5, RED);
+        DrawLine(currEdge.startX, currEdge.startY, currEdge.endX, currEdge.endY, RED);
     }
 
     // draw player
