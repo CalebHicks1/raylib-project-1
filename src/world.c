@@ -435,7 +435,7 @@ void roomTilesToRoomLines(GameState *game)
                 {
                     // update endpoints of edge
                     edges[visitedTiles[i].northEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
-                    edges[visitedTiles[i].northEdgeId].endY = edges[visitedTiles[i].northEdgeId].endY;
+                    edges[visitedTiles[i].northEdgeId].endY = game->roomTiles[i].position.y;
                 }
                 else
                 {
@@ -455,7 +455,7 @@ void roomTilesToRoomLines(GameState *game)
                 {
                     // update endpoints of edge
                     edges[visitedTiles[i].southEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
-                    edges[visitedTiles[i].southEdgeId].endY = edges[visitedTiles[i].southEdgeId].endY + game->tileSize;
+                    edges[visitedTiles[i].southEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
                 }
                 else
                 {
@@ -463,7 +463,7 @@ void roomTilesToRoomLines(GameState *game)
                     edges[visitedTiles[i].southEdgeId].visited = true;
                     edges[visitedTiles[i].southEdgeId].startX = game->roomTiles[i].position.x;
                     edges[visitedTiles[i].southEdgeId].startY = game->roomTiles[i].position.y + game->tileSize;
-                    edges[visitedTiles[i].southEdgeId].endX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].southEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
                     edges[visitedTiles[i].southEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
                 }
             }
