@@ -126,21 +126,12 @@ int compareAnglePoints(const void *a, const void *b)
     return 0;
 }
 
-Triangle *calculateSightPolygon(Vector2 origin, Edge *edges, int edgeCount, float maxDistance, GameState *game)
+Triangle *calculateSightTriangles(Vector2 origin, Edge *edges, int edgeCount, float maxDistance, GameState *game)
 {
     if (game->triangles != NULL)
     {
         free(game->triangles);
     }
-    SightPolygon result = {0};
-
-    if (edges == NULL || edgeCount <= 0)
-    {
-        printf("ERROR: Invalid edges array\n");
-        return NULL;
-    }
-
-    printf("calculateSightPolygon: origin=(%.1f,%.1f), edgeCount=%d\n", origin.x, origin.y, edgeCount);
 
     // Get screen corners in world coordinates
     Vector2 screenCorners[4] = {
@@ -174,62 +165,58 @@ Triangle *calculateSightPolygon(Vector2 origin, Edge *edges, int edgeCount, floa
         }
     }
 
-    // Generate rays to edge endpoints with small offsets
-    for (int i = 0; i < edgeCount; i++)
+    if (edgeCount > 0)
     {
-        // Process start point
-        Vector2 toStart = Vector2Subtract(edges[i].start, origin);
-        if (Vector2Length(toStart) > 0.1f) // Skip if too close
+
+        // Generate rays to edge endpoints with small offsets
+        for (int i = 0; i < edgeCount; i++)
         {
-            float baseAngle = atan2f(toStart.y, toStart.x);
-
-            // Cast rays with small angular offsets
-            float offsets[] = {-0.0001f, 0.0f, 0.0001f};
-            for (int j = 0; j < 3; j++)
+            // Process start point
+            Vector2 toStart = Vector2Subtract(edges[i].start, origin);
+            if (Vector2Length(toStart) > 0.1f) // Skip if too close
             {
-                float angle = baseAngle + offsets[j];
-                Vector2 direction = {cosf(angle), sinf(angle)};
-                Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
+                float baseAngle = atan2f(toStart.y, toStart.x);
 
-                anglePoints[pointCount].angle = normalizeAngle(angle);
-                anglePoints[pointCount].point = intersection;
-                anglePoints[pointCount].isValid = true;
-                pointCount++;
+                // Cast rays with small angular offsets
+                float offsets[] = {-0.0001f, 0.0f, 0.0001f};
+                for (int j = 0; j < 3; j++)
+                {
+                    float angle = baseAngle + offsets[j];
+                    Vector2 direction = {cosf(angle), sinf(angle)};
+                    Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
+
+                    anglePoints[pointCount].angle = normalizeAngle(angle);
+                    anglePoints[pointCount].point = intersection;
+                    anglePoints[pointCount].isValid = true;
+                    pointCount++;
+                }
             }
-        }
 
-        // Process end point
-        Vector2 toEnd = Vector2Subtract(edges[i].end, origin);
-        if (Vector2Length(toEnd) > 0.1f) // Skip if too close
-        {
-            float baseAngle = atan2f(toEnd.y, toEnd.x);
-
-            // Cast rays with small angular offsets
-            float offsets[] = {-0.0001f, 0.0f, 0.0001f};
-            for (int j = 0; j < 3; j++)
+            // Process end point
+            Vector2 toEnd = Vector2Subtract(edges[i].end, origin);
+            if (Vector2Length(toEnd) > 0.1f) // Skip if too close
             {
-                float angle = baseAngle + offsets[j];
-                Vector2 direction = {cosf(angle), sinf(angle)};
-                Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
+                float baseAngle = atan2f(toEnd.y, toEnd.x);
 
-                anglePoints[pointCount].angle = normalizeAngle(angle);
-                anglePoints[pointCount].point = intersection;
-                anglePoints[pointCount].isValid = true;
-                pointCount++;
+                // Cast rays with small angular offsets
+                float offsets[] = {-0.0001f, 0.0f, 0.0001f};
+                for (int j = 0; j < 3; j++)
+                {
+                    float angle = baseAngle + offsets[j];
+                    Vector2 direction = {cosf(angle), sinf(angle)};
+                    Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
+
+                    anglePoints[pointCount].angle = normalizeAngle(angle);
+                    anglePoints[pointCount].point = intersection;
+                    anglePoints[pointCount].isValid = true;
+                    pointCount++;
+                }
             }
         }
     }
 
     // Sort by angle
     qsort(anglePoints, pointCount, sizeof(AnglePoint), compareAnglePoints);
-
-    // draw all lines:
-    // for (int i = 0; i < pointCount; i++)
-    // {
-    //     int scaledAngle = (int)((anglePoints[i].angle / (2.0f * PI)) * 255.0f);
-    //     DrawLine(origin.x, origin.y, anglePoints[i].point.x, anglePoints[i].point.y, (Color){scaledAngle, scaledAngle, scaledAngle, 255});
-    //     DrawCircle(anglePoints[i].point.x, anglePoints[i].point.y, 2, (Color){scaledAngle, scaledAngle, scaledAngle, 255});
-    // }
 
     // // Remove duplicate points and build final polygon
     AnglePoint *finalAnglePoints = malloc(maxPoints * sizeof(AnglePoint));
@@ -280,35 +267,9 @@ Triangle *calculateSightPolygon(Vector2 origin, Edge *edges, int edgeCount, floa
     game->triangles = triangles;
     game->triangleCount = finalPointCount;
 
-    // draw triangles
-    for (int i = 0; i < game->triangleCount; i++)
-    {
-        float scaledColor = (((float)i / (float)(game->triangleCount)) * 255.0f);
-        DrawTriangle(game->triangles[i].point3, game->triangles[i].point2, game->triangles[i].point1, (Color){scaledColor, 255, 255, 255});
-        // DrawLine(game->triangles[i].point1.x, game->triangles[i].point1.y, game->triangles[i].point2.x, game->triangles[i].point2.y, WHITE);
-        // DrawLine(game->triangles[i].point1.x, game->triangles[i].point1.y, game->triangles[i].point3.x, game->triangles[i].point3.y, WHITE);
-        // DrawLine(game->triangles[i].point2.x, game->triangles[i].point2.y, game->triangles[i].point3.x, game->triangles[i].point3.y, WHITE);
-        // DrawCircle(game->triangles[i].point2.x, game->triangles[i].point2.x, 5, WHITE);
-    }
-    // draw final lines
-    for (int i = 0; i < finalPointCount; i++)
-    {
-        float scaledColor = (((float)i / (float)(finalPointCount)) * 255.0f);
-        DrawLine(origin.x, origin.y, finalAnglePoints[i].point.x, finalAnglePoints[i].point.y, (Color){scaledColor, 255, 255, 255});
-
-        DrawCircle(finalAnglePoints[i].point.x, finalAnglePoints[i].point.y, 2, (Color){scaledColor, 255, 255, 255});
-        DrawText(TextFormat("%d", i),
-                 finalAnglePoints[i].point.x + 5,  // Offset slightly to the right
-                 finalAnglePoints[i].point.y - 10, // Offset slightly above
-                 12,                               // Font size
-                 BLACK);                           // Text color
-    }
-
     free(anglePoints);
     free(finalAnglePoints);
     game->triangleCount = finalPointCount;
-    return triangles;
-
     return triangles;
 }
 
@@ -317,52 +278,14 @@ void drawSightPolygon(GameState *game, Color color)
 {
     for (int i = 0; i < game->triangleCount; i++)
     {
-        // DrawTriangle(game->triangles[i].point1, game->triangles[i].point2, game->triangles[i].point3, BLUE);
-        // DrawLine(game->triangles[i].point1.x, game->triangles[i].point1.y, game->triangles[i].point2.x, game->triangles[i].point2.y, WHITE);
-        // DrawLine(game->triangles[i].point1.x, game->triangles[i].point1.y, game->triangles[i].point3.x, game->triangles[i].point3.y, WHITE);
-        // DrawLine(game->triangles[i].point2.x, game->triangles[i].point2.y, game->triangles[i].point3.x, game->triangles[i].point3.y, WHITE);
-        // DrawCircle(game->triangles[i].point2.x, game->triangles[i].point2.x, 5, WHITE);
+        DrawTriangle(game->triangles[i].point3, game->triangles[i].point2, game->triangles[i].point1, (Color){255, 255, 255, 20});
     }
-    //     if (polygon.pointCount < 3)
-    //         return;
-
-    // // Draw as individual triangles from origin
-    // Vector2 center = {0, 0}; // You'll need to pass the origin here
-
-    // // For now, use first point as reference
-    // Vector2 origin = polygon.points[0]; // This is not ideal - should pass origin separately
-
-    // for (int i = 0; i < polygon.pointCount; i++)
-    // {
-    //     int next = (i + 1) % polygon.pointCount;
-    //     DrawTriangle(origin, polygon.points[i], polygon.points[next], ColorAlpha(color, 0.3f));
-    // }
-
-    // // Draw debug lines
-    // for (int i = 0; i < polygon.pointCount; i++)
-    // {
-    //     int next = (i + 1) % polygon.pointCount;
-    //     DrawLineV(polygon.points[i], polygon.points[next], RED);
-    //     DrawCircleV(polygon.points[i], 2, BLUE);
-    // }
 }
-
-// Free sight polygon memory
-// void freeSightPolygon(SightPolygon *polygon)
-// {
-//     if (polygon->points != NULL)
-//     {
-//         free(polygon->points);
-//         polygon->points = NULL;
-//         polygon->pointCount = 0;
-//     }
-// }
 
 // Convenience function for game integration
 // Convenience function for game integration
 Triangle *calculatePlayerSight(GameState *game, float sightRange)
 {
-    SightPolygon emptyResult = {0};
 
     printf("calculatePlayerSight: edgeCount=%d, sightRange=%.1f\n", game->roomEdgeCount, sightRange);
 
@@ -370,5 +293,7 @@ Triangle *calculatePlayerSight(GameState *game, float sightRange)
         game->player->playerPos.x + game->player->playerSize.x / 2,
         game->player->playerPos.y + game->player->playerSize.y / 2};
 
-    return calculateSightPolygon(playerCenter, game->roomEdges, game->roomEdgeCount, sightRange, game);
+    // Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), game->playerCamera->camera);
+
+    return calculateSightTriangles(playerCenter, game->roomEdges, game->roomEdgeCount, sightRange, game);
 }

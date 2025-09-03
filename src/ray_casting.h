@@ -11,7 +11,7 @@ typedef struct SightPolygon
 } SightPolygon;
 
 // Core functions
-Triangle *calculateSightPolygon(Vector2 origin, Edge *edges, int edgeCount, float maxDistance, GameState *game);
+Triangle *calculateSightTriangles(Vector2 origin, Edge *edges, int edgeCount, float maxDistance, GameState *game);
 Triangle *calculatePlayerSight(GameState *game, float sightRange);
 
 // Utility functions

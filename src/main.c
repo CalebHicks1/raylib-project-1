@@ -101,7 +101,7 @@ void drawGame(GameState *game)
     drawRoomTiles(game);
 
     // Calculate and draw sight polygon
-    Triangle *sight = calculatePlayerSight(game, 350.0f); // 300 pixel sight range
+    Triangle *sight = calculatePlayerSight(game, game->screenWidth); // 300 pixel sight range
     drawSightPolygon(game, ColorAlpha(YELLOW, 0.3f));
 
     // draw edge visualizations
