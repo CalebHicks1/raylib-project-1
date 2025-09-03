@@ -149,7 +149,7 @@ TileCorners getTileFrames(GameState *game, Tile *tile)
     else if (hasNorth && hasWest && !hasNorthWest)
     {
         // Inner corner (concave)
-        result.topLeft = (Rectangle){8 * edgeSize, 2 * edgeSize, edgeSize, edgeSize};
+        result.topLeft = (Rectangle){4 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
     }
     else
     {
@@ -161,81 +161,81 @@ TileCorners getTileFrames(GameState *game, Tile *tile)
     if (!hasNorth && !hasEast)
     {
         // Isolated corner
-        result.topRight = (Rectangle){5 * edgeSize, 0, edgeSize, edgeSize};
+        result.topRight = (Rectangle){2 * edgeSize, 0, edgeSize, edgeSize};
     }
     else if (hasNorth && !hasEast)
     {
         // North edge
-        result.topRight = (Rectangle){5 * edgeSize, edgeSize, edgeSize, edgeSize};
+        result.topRight = (Rectangle){2 * edgeSize, edgeSize, edgeSize, edgeSize};
     }
     else if (!hasNorth && hasEast)
     {
         // East edge
-        result.topRight = (Rectangle){4 * edgeSize, 0, edgeSize, edgeSize};
+        result.topRight = (Rectangle){edgeSize, 0, edgeSize, edgeSize};
     }
     else if (hasNorth && hasEast && !hasNorthEast)
     {
         // Inner corner (concave)
-        result.topRight = (Rectangle){7 * edgeSize, 2 * edgeSize, edgeSize, edgeSize};
+        result.topRight = (Rectangle){3 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
     }
     else
     {
         // Fully connected
-        result.topRight = (Rectangle){4 * edgeSize, edgeSize, edgeSize, edgeSize};
+        result.topRight = (Rectangle){edgeSize, edgeSize, edgeSize, edgeSize};
     }
 
     // BOTTOM LEFT CORNER
     if (!hasSouth && !hasWest)
     {
         // Isolated corner
-        result.bottomLeft = (Rectangle){0, 5 * edgeSize, edgeSize, edgeSize};
+        result.bottomLeft = (Rectangle){0, 2 * edgeSize, edgeSize, edgeSize};
     }
     else if (hasSouth && !hasWest)
     {
         // South edge
-        result.bottomLeft = (Rectangle){0, 4 * edgeSize, edgeSize, edgeSize};
+        result.bottomLeft = (Rectangle){0, edgeSize, edgeSize, edgeSize};
     }
     else if (!hasSouth && hasWest)
     {
         // West edge
-        result.bottomLeft = (Rectangle){edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+        result.bottomLeft = (Rectangle){edgeSize, 2 * edgeSize, edgeSize, edgeSize};
     }
     else if (hasSouth && hasWest && !hasSouthWest)
     {
         // Inner corner (concave)
-        result.bottomLeft = (Rectangle){8 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
+        result.bottomLeft = (Rectangle){4 * edgeSize, 0, edgeSize, edgeSize};
     }
     else
     {
         // Fully connected
-        result.bottomLeft = (Rectangle){edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+        result.bottomLeft = (Rectangle){edgeSize, edgeSize, edgeSize, edgeSize};
     }
 
     // BOTTOM RIGHT CORNER
     if (!hasSouth && !hasEast)
     {
         // Isolated corner
-        result.bottomRight = (Rectangle){5 * edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+        result.bottomRight = (Rectangle){2 * edgeSize, 2 * edgeSize, edgeSize, edgeSize};
     }
     else if (hasSouth && !hasEast)
     {
         // South edge
-        result.bottomRight = (Rectangle){5 * edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+        result.bottomRight = (Rectangle){2 * edgeSize, edgeSize, edgeSize, edgeSize};
     }
     else if (!hasSouth && hasEast)
     {
         // East edge
-        result.bottomRight = (Rectangle){4 * edgeSize, 5 * edgeSize, edgeSize, edgeSize};
+        result.bottomRight = (Rectangle){edgeSize, 2 * edgeSize, edgeSize, edgeSize};
     }
     else if (hasSouth && hasEast && !hasSouthEast)
     {
         // Inner corner (concave)
-        result.bottomRight = (Rectangle){7 * edgeSize, 1 * edgeSize, edgeSize, edgeSize};
+        result.bottomRight = (Rectangle){3 * edgeSize, 0, edgeSize, edgeSize};
     }
     else
     {
         // Fully connected
-        result.bottomRight = (Rectangle){4 * edgeSize, 4 * edgeSize, edgeSize, edgeSize};
+        result.bottomRight = (Rectangle){edgeSize, edgeSize, edgeSize, edgeSize};
     }
 
     return result;
