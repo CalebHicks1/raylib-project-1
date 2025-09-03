@@ -6,9 +6,20 @@ in vec4 fragColor;
 out vec4 finalColor;
 
 uniform vec2 lightPos;
+uniform vec2 resolution;
+uniform sampler2D lightTexture; // Your render texture
 
 void main()
 {
+    vec2 flippedTexCoord = vec2(fragTexCoord.x, 1.0 - fragTexCoord.y);
+    float lightValue = texture(lightTexture, flippedTexCoord).r;
+
+    // if (lightValue > 0.5) {
+    //     finalColor = vec4(0,0,0,0);
+    // } else {
+    //     finalColor = vec4(0,0,0,1);
+    // }
+
     int screenHeight = 450;
     int screenWidth = 800;
     float ambientDarkness = 0.3;
@@ -27,14 +38,14 @@ void main()
     vec3 finalColorRGB;
     float alpha;
     
-    if (distance <= innerRadius)
+    if (lightValue > 0.5 && distance <= innerRadius)
     {
         // Inside inner radius - full light color
         lightIntensity = 1.0;
         finalColorRGB = lightColor;
         alpha = 0.3; // Some transparency to blend with background
     }
-    else if (distance <= outerRadius)
+    else if ( lightValue > 0.5 && distance <= outerRadius)
     {
         // Fade from light to ambient
         float fadeAmount = (distance - innerRadius) / (outerRadius - innerRadius);
@@ -51,4 +62,6 @@ void main()
     }
     
     finalColor = vec4(finalColorRGB, alpha);
+
+
 }

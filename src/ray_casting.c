@@ -278,7 +278,11 @@ void drawSightPolygon(GameState *game, Color color)
 {
     for (int i = 0; i < game->triangleCount; i++)
     {
-        DrawTriangle(game->triangles[i].point3, game->triangles[i].point2, game->triangles[i].point1, (Color){255, 255, 255, 20});
+        Vector2 point3 = GetWorldToScreen2D(game->triangles[i].point3, game->playerCamera->camera);
+        Vector2 point2 = GetWorldToScreen2D(game->triangles[i].point2, game->playerCamera->camera);
+        Vector2 point1 = GetWorldToScreen2D(game->triangles[i].point1, game->playerCamera->camera);
+        DrawTriangle(point3, point2, point1, WHITE);
+        // DrawTriangle(game->triangles[i].point3, game->triangles[i].point2, game->triangles[i].point1, (Color){255, 255, 255, 20});
     }
 }
 
@@ -287,7 +291,7 @@ void drawSightPolygon(GameState *game, Color color)
 Triangle *calculatePlayerSight(GameState *game, float sightRange)
 {
 
-    printf("calculatePlayerSight: edgeCount=%d, sightRange=%.1f\n", game->roomEdgeCount, sightRange);
+    // printf("calculatePlayerSight: edgeCount=%d, sightRange=%.1f\n", game->roomEdgeCount, sightRange);
 
     Vector2 playerCenter = {
         game->player->playerPos.x + game->player->playerSize.x / 2,

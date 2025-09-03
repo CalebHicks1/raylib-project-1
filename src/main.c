@@ -10,7 +10,7 @@
 #include "ray_casting.h"
 
 void updateGame(GameState *game);
-void drawGame(GameState *game);
+void drawGame(GameState *game, RenderTexture2D, RenderTexture2D shadowTexture, RenderTexture2D worldTexture);
 
 int main()
 {
@@ -30,6 +30,14 @@ int main()
     float lightPosLoc = GetShaderLocation(spotlightShader, "lightPos");
     Vector2 lightPos = {0, 0};
     SetShaderValue(spotlightShader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC2);
+    int resolutionLoc = GetShaderLocation(spotlightShader, "resolution");
+    Vector2 resolution = {(float)screenWidth, (float)screenHeight};
+    SetShaderValue(spotlightShader, resolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
+    // white is light, black is dark
+    RenderTexture2D lightTexture = LoadRenderTexture(game.screenWidth, game.screenHeight);
+    RenderTexture2D shadowTexture = LoadRenderTexture(game.screenWidth, game.screenHeight);
+    RenderTexture2D worldTexture = LoadRenderTexture(game.screenWidth, game.screenHeight);
+    SetTextureFilter(lightTexture.texture, TEXTURE_FILTER_BILINEAR);
     game.spotlightShader = spotlightShader;
     //--------------------------------------------------------------------------------------
 
@@ -42,12 +50,15 @@ int main()
         SetShaderValue(spotlightShader, lightPosLoc, &playerScreenPos, SHADER_UNIFORM_VEC2);
 
         // Draw
-        drawGame(&game);
+        drawGame(&game, lightTexture, shadowTexture, worldTexture);
     }
 
     // De-Initialization
     CloseWindow(); // Close window and OpenGL context
     FreeGame(&game);
+    UnloadRenderTexture(lightTexture);
+    UnloadRenderTexture(shadowTexture);
+    UnloadRenderTexture(worldTexture);
 
     return 0;
 }
@@ -87,44 +98,53 @@ void updateGame(GameState *game)
     updateCamera(game);
 }
 
-void drawGame(GameState *game)
+void drawGame(GameState *game, RenderTexture2D lightTexture, RenderTexture2D shadowTexture, RenderTexture2D worldTexture)
 {
-    BeginDrawing();
-
-    ClearBackground(BLACK);
-    // BeginMode3D(camera);
-
-    // draw anything subject to camera
-    BeginMode2D(game->playerCamera->camera);
-
-    // draw room tiles
-    drawRoomTiles(game);
 
     // Calculate and draw sight polygon
     Triangle *sight = calculatePlayerSight(game, game->screenWidth); // 300 pixel sight range
+
+    BeginTextureMode(shadowTexture);
+    DrawRectangle(0, 0, game->screenWidth, game->screenHeight, BLACK);
+    EndTextureMode();
+    // Make sure your lightTexture is the same size as your screen
+    BeginTextureMode(lightTexture);
+    // After creating the render texture, set filtering mode
+    ClearBackground(BLACK);
+    // draw white triangles every where the light can touch
     drawSightPolygon(game, ColorAlpha(YELLOW, 0.3f));
+    EndTextureMode();
+
+    BeginTextureMode(worldTexture);
+    BeginMode2D(game->playerCamera->camera);
+    ClearBackground(BLACK);
+    drawRoomTiles(game);
 
     // draw edge visualizations
-    for (int i = 0; i < game->roomEdgeCount; i++)
-    {
-        Edge currEdge = game->roomEdges[i];
-        // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
-        // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
-        DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
-    }
+    // for (int i = 0; i < game->roomEdgeCount; i++)
+    // {
+    //     Edge currEdge = game->roomEdges[i];
+    //     // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
+    //     // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
+    //     DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
+    // }
 
     // draw player
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, WHITE);
-
-    // Anything after EndMode2D() will be drawn outside of the camera (Like the UI)
-    // Vector2 MousePos = GetMousePosition();
-    // Vector2 MousePosInWorld = GetScreenToWorld2D(MousePos, game->playerCamera->camera);
-    // DrawRectangle(MousePosInWorld.x, MousePosInWorld.y, game->player->playerSize.x, game->player->playerSize.y, BLUE);
     EndMode2D();
+    EndTextureMode();
 
-    // draw a rectangle with cutouts where light is
+    // draw texture to screen
+    BeginDrawing();
+    ClearBackground(BLACK);
+    Rectangle source = {0, 0, (float)worldTexture.texture.width, -(float)worldTexture.texture.height};
+    Rectangle dest = {0, 0, (float)worldTexture.texture.width, (float)worldTexture.texture.height};
+    DrawTexturePro(worldTexture.texture, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
+
     BeginShaderMode(game->spotlightShader);
-    DrawRectangle(0, 0, game->screenWidth, game->screenHeight, WHITE);
+    SetShaderValueTexture(game->spotlightShader, GetShaderLocation(game->spotlightShader, "lightTexture"), lightTexture.texture);
+    // DrawRectangle(0, 0, game->screenWidth, game->screenHeight, WHITE);
+    DrawTexture(shadowTexture.texture, 0, 0, BLACK);
     EndShaderMode();
 
     // draw ui
