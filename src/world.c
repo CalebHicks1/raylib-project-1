@@ -291,3 +291,224 @@ void drawRoomTiles(GameState *game)
         }
     }
 }
+
+/*
+    Given a 1D array of tiles, identify all contiguous edges of each group of tiles
+    This greatly reduces the number of points to check when calculating shadows
+
+    For now, just operate on whole room
+*/
+void roomTilesToRoomLines(GameState *game)
+{
+    if (game->roomEdges != NULL)
+    {
+        free(game->roomEdges);
+    }
+
+    // used to track which edge each tile is using
+    TileEdges *visitedTiles = calloc(game->roomHeight * game->roomWidth, sizeof(TileEdges));
+    // TODO: do this better
+    // Edge *edges = calloc(200, sizeof(Edge));
+    // iterate through all tiles in room
+    int edgeIndex = 0;
+    for (int x = 0; x < game->roomWidth; x++)
+    {
+        for (int y = 0; y < game->roomHeight; y++)
+        {
+            // get array indicies for each neighboring tile
+            // can access a 1d array like a 2d array using the formula
+            // (y * width) + x
+            int i = ((y)*game->roomWidth) + (x);
+            int north = ((y - 1) * game->roomWidth) + (x);
+            int south = ((y + 1) * game->roomWidth) + (x);
+            int east = ((y)*game->roomWidth) + (x + 1);
+            int west = ((y)*game->roomWidth) + (x - 1);
+
+            Tile thisTile = game->roomTiles[i];
+            // initialize tileEdges for this tile
+            visitedTiles[i].isWall = false;
+            visitedTiles[i].northEdgeId = -1;
+            visitedTiles[i].southEdgeId = -1;
+            visitedTiles[i].eastEdgeId = -1;
+            visitedTiles[i].westEdgeId = -1;
+            // if this tile is a wall, calculate its edges
+            if (thisTile.tileType == TILE_WALL)
+            {
+                visitedTiles[i].isWall = true;
+                // does this tile have a western neighbor? if not, get a new western edge
+                // check if it is out of bounds first
+                if (west < 0 || game->roomTiles[west].tileType != TILE_WALL)
+                {
+                    // if the tile has a northern neighbor with a western edge, can use its western edge
+                    if (north > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].westEdgeId != -1)
+                    {
+
+                        // the northern neighbor has a western edge, which we can use now
+                        visitedTiles[i].westEdgeId = visitedTiles[north].westEdgeId;
+                        // extend the edge down
+                    }
+                    else
+                    {
+                        // create a new western edge
+                        visitedTiles[i].westEdgeId = edgeIndex;
+                        // set the edge start point
+                        edgeIndex++;
+                    }
+                }
+                // does this tile have a eastern neighbor? if not, get a new eastern edge
+                // check if it is out of bounds first
+                if (east > game->roomWidth * game->roomHeight || game->roomTiles[east].tileType != TILE_WALL)
+                {
+                    // if the tile has a northern neighbor with a eastern edge, can use its eastern edge
+                    if (north > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].eastEdgeId != -1)
+                    {
+
+                        // the northern neighbor has a eastern edge, which we can use now
+                        visitedTiles[i].eastEdgeId = visitedTiles[north].eastEdgeId;
+                        // extend the edge down
+                    }
+                    else
+                    {
+                        // create a new eastern edge
+                        visitedTiles[i].eastEdgeId = edgeIndex;
+                        // set the edge start point
+                        edgeIndex++;
+                    }
+                }
+                // does this tile have a northern neighbor? if not, get a new northern edge
+                // check if it is out of bounds first
+                if (north < 0 || game->roomTiles[north].tileType != TILE_WALL)
+                {
+                    // if the tile has a western neighbor with a western edge, can use its northern edge
+                    if (west > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].northEdgeId != -1)
+                    {
+
+                        // the western neighbor has a northern edge, which we can use now
+                        visitedTiles[i].northEdgeId = visitedTiles[west].northEdgeId;
+                        // extend the edge down
+                    }
+                    else
+                    {
+                        // create a new northern edge
+                        visitedTiles[i].northEdgeId = edgeIndex;
+                        // set the edge start point
+                        edgeIndex++;
+                    }
+                }
+                // does this tile have a southern neighbor? if not, get a new southern edge
+                // check if it is out of bounds first
+                if (south > game->roomWidth * game->roomHeight || game->roomTiles[south].tileType != TILE_WALL)
+                {
+                    // if the tile has a western neighbor with a southern edge, can use its southern edge
+                    if (west > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].southEdgeId != -1)
+                    {
+
+                        // the western neighbor has a western edge, which we can use now
+                        visitedTiles[i].southEdgeId = visitedTiles[west].southEdgeId;
+                        // extend the edge down
+                    }
+                    else
+                    {
+                        // create a new western edge
+                        visitedTiles[i].southEdgeId = edgeIndex;
+                        // set the edge start point
+                        edgeIndex++;
+                    }
+                }
+            }
+        }
+    }
+    // TODO: build the list of edges now
+    // iterate back through the list of visited tiles, extending them as we go
+    Edge *edges = calloc(edgeIndex + 1, sizeof(Edge));
+
+    for (int x = 0; x < game->roomWidth; x++)
+    {
+        for (int y = 0; y < game->roomHeight; y++)
+        {
+            // calculate each edge's start point, or increase its end point
+            int i = ((y)*game->roomWidth) + (x);
+            // north edge
+            if (visitedTiles[i].northEdgeId != -1)
+            {
+                if (edges[visitedTiles[i].northEdgeId].visited)
+                {
+                    // update endpoints of edge
+                    edges[visitedTiles[i].northEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].northEdgeId].endY = edges[visitedTiles[i].northEdgeId].endY;
+                }
+                else
+                {
+                    // populate start points of edge
+                    edges[visitedTiles[i].northEdgeId].visited = true;
+                    edges[visitedTiles[i].northEdgeId].startX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].northEdgeId].startY = game->roomTiles[i].position.y;
+                    edges[visitedTiles[i].northEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].northEdgeId].endY = game->roomTiles[i].position.y;
+                }
+            }
+            // south edge
+            if (visitedTiles[i].southEdgeId != -1)
+            {
+
+                if (edges[visitedTiles[i].southEdgeId].visited)
+                {
+                    // update endpoints of edge
+                    edges[visitedTiles[i].southEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].southEdgeId].endY = edges[visitedTiles[i].southEdgeId].endY + game->tileSize;
+                }
+                else
+                {
+                    // populate start points of edge
+                    edges[visitedTiles[i].southEdgeId].visited = true;
+                    edges[visitedTiles[i].southEdgeId].startX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].southEdgeId].startY = game->roomTiles[i].position.y + game->tileSize;
+                    edges[visitedTiles[i].southEdgeId].endX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].southEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
+                }
+            }
+            // east edge
+            if (visitedTiles[i].eastEdgeId != -1)
+            {
+
+                if (edges[visitedTiles[i].eastEdgeId].visited)
+                {
+                    // update endpoints of edge
+                    edges[visitedTiles[i].eastEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].eastEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
+                }
+                else
+                {
+                    // populate start points of edge
+                    edges[visitedTiles[i].eastEdgeId].visited = true;
+                    edges[visitedTiles[i].eastEdgeId].startX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].eastEdgeId].startY = game->roomTiles[i].position.y;
+                    edges[visitedTiles[i].eastEdgeId].endX = game->roomTiles[i].position.x + game->tileSize;
+                    edges[visitedTiles[i].eastEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
+                }
+            }
+            // west edge
+            if (visitedTiles[i].westEdgeId != -1)
+            {
+                if (edges[visitedTiles[i].westEdgeId].visited)
+                {
+                    // update endpoints of edge
+                    edges[visitedTiles[i].westEdgeId].endX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].westEdgeId].endY = edges[visitedTiles[i].westEdgeId].endY + game->tileSize;
+                }
+                else
+                {
+                    // populate start points of edge
+                    edges[visitedTiles[i].westEdgeId].visited = true;
+                    edges[visitedTiles[i].westEdgeId].startX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].westEdgeId].startY = game->roomTiles[i].position.y;
+                    edges[visitedTiles[i].westEdgeId].endX = game->roomTiles[i].position.x;
+                    edges[visitedTiles[i].westEdgeId].endY = game->roomTiles[i].position.y + game->tileSize;
+                }
+            }
+        }
+    }
+    game->roomEdges = edges;
+    game->roomEdgeCount = edgeIndex + 1;
+    free(visitedTiles);
+}

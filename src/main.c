@@ -2,7 +2,7 @@
 #include "raymath.h"
 #include "second.h"
 #include "stdio.h"
-
+#include <stdlib.h>
 #include "player.h"
 #include "camera.h"
 #include "game_state.h"
@@ -80,6 +80,8 @@ void updateGame(GameState *game)
         }
     }
 
+    roomTilesToRoomLines(game);
+
     updatePlayer(game);
     // update camera
     updateCamera(game);
@@ -97,6 +99,14 @@ void drawGame(GameState *game)
 
     // draw room tiles
     drawRoomTiles(game);
+
+    // draw edge visualizations
+    for (int i = 0; i < game->roomEdgeCount; i++)
+    {
+        Edge currEdge = game->roomEdges[i];
+        DrawCircle(currEdge.startX, currEdge.startY, 5, RED);
+        DrawCircle(currEdge.endX, currEdge.endY, 5, RED);
+    }
 
     // draw player
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, RED);

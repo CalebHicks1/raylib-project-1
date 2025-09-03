@@ -7,6 +7,7 @@
 typedef struct Player Player;
 typedef struct PlayerCamera PlayerCamera;
 typedef struct Tile Tile;
+typedef struct Edge Edge;
 
 // Structs
 typedef enum TileType
@@ -31,9 +32,11 @@ typedef struct GameState
     PlayerCamera *playerCamera; // player camera struct. defined in camera.h
     int screenWidth;
     int screenHeight;
-    float deltaTime;                    // time since last frame
-    int tileSize;                       // length of the side of one tile, in pixels
-    Tile *roomTiles;                    // single 1D array
+    float deltaTime; // time since last frame
+    int tileSize;    // length of the side of one tile, in pixels
+    Tile *roomTiles; // single 1D array
+    Edge *roomEdges;
+    int roomEdgeCount;
     int roomWidth;                      // width of the current room
     int roomHeight;                     // height of the current room
     Texture2D tileTextures[TILE_COUNT]; // textures for each tile type, indexed by TILE_TYPE
