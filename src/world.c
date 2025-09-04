@@ -8,6 +8,8 @@ Given a room width/height, generate a tile map for the room and set it as the ga
 */
 void loadRoomTiles(GameState *game, int roomWidth, int roomHeight)
 {
+    int barrierSize = 2; // number of tiles between void and room
+
     // free the prev room if it exists
     if (game->roomTiles != NULL)
     {
@@ -23,7 +25,15 @@ void loadRoomTiles(GameState *game, int roomWidth, int roomHeight)
         for (int y = 0; y < roomHeight; y++)
         {
             Tile *tile = &GET_TILE(game, x, y);
-            tile->tileType = TILE_FLOOR;
+            if (x - barrierSize < 0 || x + barrierSize >= roomWidth || y - barrierSize < 0 || y + barrierSize >= roomHeight)
+            {
+                tile->tileType = TILE_WALL;
+            }
+            else
+            {
+
+                tile->tileType = TILE_FLOOR;
+            }
             tile->position = (Vector2){x * game->tileSize, y * game->tileSize};
         }
     }
@@ -71,7 +81,7 @@ bool hasNeighbor(GameState *game, Tile *tile, Direction direction)
     if (neighborX < 0 || neighborX >= game->roomWidth ||
         neighborY < 0 || neighborY >= game->roomHeight)
     {
-        return false; // Out of bounds
+        return true; // Out of bounds
     }
 
     // Check if neighbor tile exists and is the same type
@@ -102,7 +112,7 @@ bool hasNeighborDiagonal(GameState *game, Tile *tile, Direction dir1, Direction 
     if (neighborX < 0 || neighborX >= game->roomWidth ||
         neighborY < 0 || neighborY >= game->roomHeight)
     {
-        return false;
+        return true;
     }
 
     Tile *neighborTile = &GET_TILE(game, neighborX, neighborY);
@@ -337,10 +347,10 @@ void roomTilesToRoomLines(GameState *game)
                 visitedTiles[i].isWall = true;
                 // does this tile have a western neighbor? if not, get a new western edge
                 // check if it is out of bounds first
-                if (west < 0 || game->roomTiles[west].tileType != TILE_WALL)
+                if (x <= 0 || game->roomTiles[west].tileType != TILE_WALL)
                 {
                     // if the tile has a northern neighbor with a western edge, can use its western edge
-                    if (north > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].westEdgeId != -1)
+                    if (y > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].westEdgeId != -1)
                     {
 
                         // the northern neighbor has a western edge, which we can use now
@@ -357,10 +367,10 @@ void roomTilesToRoomLines(GameState *game)
                 }
                 // does this tile have a eastern neighbor? if not, get a new eastern edge
                 // check if it is out of bounds first
-                if (east > game->roomWidth * game->roomHeight || game->roomTiles[east].tileType != TILE_WALL)
+                if (x == game->roomWidth - 1 || game->roomTiles[east].tileType != TILE_WALL)
                 {
                     // if the tile has a northern neighbor with a eastern edge, can use its eastern edge
-                    if (north > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].eastEdgeId != -1)
+                    if (y > 0 && game->roomTiles[north].tileType == TILE_WALL && visitedTiles[north].eastEdgeId != -1)
                     {
 
                         // the northern neighbor has a eastern edge, which we can use now
@@ -377,10 +387,10 @@ void roomTilesToRoomLines(GameState *game)
                 }
                 // does this tile have a northern neighbor? if not, get a new northern edge
                 // check if it is out of bounds first
-                if (north < 0 || game->roomTiles[north].tileType != TILE_WALL)
+                if (y <= 0 || game->roomTiles[north].tileType != TILE_WALL)
                 {
                     // if the tile has a western neighbor with a western edge, can use its northern edge
-                    if (west > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].northEdgeId != -1)
+                    if (x > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].northEdgeId != -1)
                     {
 
                         // the western neighbor has a northern edge, which we can use now
@@ -397,10 +407,10 @@ void roomTilesToRoomLines(GameState *game)
                 }
                 // does this tile have a southern neighbor? if not, get a new southern edge
                 // check if it is out of bounds first
-                if (south > game->roomWidth * game->roomHeight || game->roomTiles[south].tileType != TILE_WALL)
+                if (y == game->roomHeight - 1 || game->roomTiles[south].tileType != TILE_WALL)
                 {
                     // if the tile has a western neighbor with a southern edge, can use its southern edge
-                    if (west > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].southEdgeId != -1)
+                    if (x > 0 && game->roomTiles[west].tileType == TILE_WALL && visitedTiles[west].southEdgeId != -1)
                     {
 
                         // the western neighbor has a western edge, which we can use now
@@ -494,7 +504,7 @@ void roomTilesToRoomLines(GameState *game)
                 {
                     // update endpoints of edge
                     edges[visitedTiles[i].westEdgeId].end.x = game->roomTiles[i].position.x;
-                    edges[visitedTiles[i].westEdgeId].end.y = edges[visitedTiles[i].westEdgeId].end.y + game->tileSize;
+                    edges[visitedTiles[i].westEdgeId].end.y = game->roomTiles[i].position.y + game->tileSize;
                 }
                 else
                 {

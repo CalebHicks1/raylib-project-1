@@ -50,38 +50,6 @@ Vector2 castRay(Vector2 origin, Vector2 direction, Edge *edges, int edgeCount, f
     return closest;
 }
 
-// // Get all unique angles to cast rays to
-// float *getUniqueAngles(Edge *edges, int edgeCount, Vector2 origin, int *angleCount)
-// {
-//     // Each edge has 2 points, each point gets 3 angles (offset versions)
-//     // So we need edgeCount * 2 * 3 = edgeCount * 6 angles
-//     float *angles = malloc(edgeCount * 6 * sizeof(float)); // Fix this line
-//     *angleCount = 0;
-
-//     for (int i = 0; i < edgeCount; i++)
-//     {
-//         // Add angle to start point
-//         Vector2 toStart = Vector2Subtract(edges[i].start, origin);
-//         float angleStart = atan2f(toStart.y, toStart.x);
-
-//         // Add angle to end point
-//         Vector2 toEnd = Vector2Subtract(edges[i].end, origin);
-//         float angleEnd = atan2f(toEnd.y, toEnd.x);
-
-//         // Add slightly offset angles to handle edge cases
-//         angles[(*angleCount)++] = angleStart - 0.0001f;
-//         angles[(*angleCount)++] = angleStart;
-//         angles[(*angleCount)++] = angleStart + 0.0001f;
-
-//         angles[(*angleCount)++] = angleEnd - 0.0001f;
-//         angles[(*angleCount)++] = angleEnd;
-//         angles[(*angleCount)++] = angleEnd + 0.0001f;
-//     }
-
-//     printf("Generated %d angles from %d edges\n", *angleCount, edgeCount);
-//     return angles;
-// }
-
 // Helper function to normalize angle to [0, 2π]
 float normalizeAngle(float angle)
 {
@@ -134,36 +102,36 @@ Triangle *calculateSightTriangles(Vector2 origin, Edge *edges, int edgeCount, fl
     }
 
     // Get screen corners in world coordinates
-    Vector2 screenCorners[4] = {
-        GetScreenToWorld2D((Vector2){0, 0}, game->playerCamera->camera),                                  // Top-left
-        GetScreenToWorld2D((Vector2){game->screenWidth, 0}, game->playerCamera->camera),                  // Top-right
-        GetScreenToWorld2D((Vector2){game->screenWidth, game->screenHeight}, game->playerCamera->camera), // Bottom-right
-        GetScreenToWorld2D((Vector2){0, game->screenHeight}, game->playerCamera->camera)                  // Bottom-left
-    };
+    // Vector2 screenCorners[4] = {
+    //     GetScreenToWorld2D((Vector2){0, 0}, game->playerCamera->camera),                                  // Top-left
+    //     GetScreenToWorld2D((Vector2){game->screenWidth, 0}, game->playerCamera->camera),                  // Top-right
+    //     GetScreenToWorld2D((Vector2){game->screenWidth, game->screenHeight}, game->playerCamera->camera), // Bottom-right
+    //     GetScreenToWorld2D((Vector2){0, game->screenHeight}, game->playerCamera->camera)                  // Bottom-left
+    // };
 
-    // Create array to hold angle-point pairs
-    int maxPoints = edgeCount * 6 + 4; // Same as before
+    // // Create array to hold angle-point pairs
+    int maxPoints = edgeCount * 6;
     AnglePoint *anglePoints = malloc(maxPoints * sizeof(AnglePoint));
     int pointCount = 0;
 
-    // FIRST: Add screen corner points
-    for (int i = 0; i < 4; i++)
-    {
-        Vector2 toCorner = Vector2Subtract(screenCorners[i], origin);
-        if (Vector2Length(toCorner) > 0.1f) // Skip if too close
-        {
-            float angle = atan2f(toCorner.y, toCorner.x);
-            Vector2 direction = {cosf(angle), sinf(angle)};
+    // // FIRST: Add screen corner points
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     Vector2 toCorner = Vector2Subtract(screenCorners[i], origin);
+    //     if (Vector2Length(toCorner) > 0.1f) // Skip if too close
+    //     {
+    //         float angle = atan2f(toCorner.y, toCorner.x);
+    //         Vector2 direction = {cosf(angle), sinf(angle)};
 
-            // Cast ray to this corner (it should hit the screen edge)
-            Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
+    //         // Cast ray to this corner (it should hit the screen edge)
+    //         Vector2 intersection = castRay(origin, direction, edges, edgeCount, maxDistance);
 
-            anglePoints[pointCount].angle = normalizeAngle(angle);
-            anglePoints[pointCount].point = intersection;
-            anglePoints[pointCount].isValid = true;
-            pointCount++;
-        }
-    }
+    //         anglePoints[pointCount].angle = normalizeAngle(angle);
+    //         anglePoints[pointCount].point = intersection;
+    //         anglePoints[pointCount].isValid = true;
+    //         pointCount++;
+    //     }
+    // }
 
     if (edgeCount > 0)
     {

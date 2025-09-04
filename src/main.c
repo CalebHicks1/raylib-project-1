@@ -121,13 +121,13 @@ void drawGame(GameState *game, RenderTexture2D lightTexture, RenderTexture2D sha
     drawRoomTiles(game);
 
     // draw edge visualizations
-    // for (int i = 0; i < game->roomEdgeCount; i++)
-    // {
-    //     Edge currEdge = game->roomEdges[i];
-    //     // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
-    //     // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
-    //     DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
-    // }
+    for (int i = 0; i < game->roomEdgeCount; i++)
+    {
+        Edge currEdge = game->roomEdges[i];
+        // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
+        // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
+        DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
+    }
 
     // draw player
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, WHITE);
