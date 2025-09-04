@@ -18,12 +18,13 @@ int main()
     //--------------------------------------------------------------------------------------
     // window and game init
     const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenHeight = 800;
     GameState game = {0};
     game.screenHeight = screenHeight;
     game.screenWidth = screenWidth;
     InitWindow(screenWidth, screenHeight, "raylib");
     InitGame(&game);
+
     SetTargetFPS(144); // Set our game to run at 60 frames-per-second
     // shaders
     Shader spotlightShader = LoadShader(0, "resources/shaders/spotlight.fs");
@@ -46,9 +47,12 @@ int main()
     {
         // Update
         updateGame(&game);
-        Vector2 playerScreenPos = GetWorldToScreen2D(Vector2Add(game.player->playerPos, Vector2Scale(game.player->playerSize, 0.5)), game.playerCamera->camera);
+        // draw light at player's feet
+        Vector2 playerFeetPos = {game.player->playerPos.x + game.player->playerSize.x / 2, game.player->playerPos.y + game.player->playerSize.y};
+        Vector2 playerScreenPos = GetWorldToScreen2D(playerFeetPos, game.playerCamera->camera);
         SetShaderValue(spotlightShader, lightPosLoc, &playerScreenPos, SHADER_UNIFORM_VEC2);
-
+        float t = GetTime();
+        SetShaderValue(spotlightShader, GetShaderLocation(spotlightShader, "time"), &t, SHADER_UNIFORM_FLOAT);
         // Draw
         drawGame(&game, lightTexture, shadowTexture, worldTexture);
     }
@@ -113,6 +117,9 @@ void drawGame(GameState *game, RenderTexture2D lightTexture, RenderTexture2D sha
     ClearBackground(BLACK);
     // draw white triangles every where the light can touch
     drawSightPolygon(game, ColorAlpha(YELLOW, 0.3f));
+    // exclude the player from the light polygon for now
+    // Vector2 playerScreenPos = GetWorldToScreen2D(game->player->playerPos, game->playerCamera->camera);
+    // DrawRectangle(playerScreenPos.x, playerScreenPos.y, game->player->playerSize.x, game->player->playerSize.y, WHITE);
     EndTextureMode();
 
     BeginTextureMode(worldTexture);
@@ -121,13 +128,13 @@ void drawGame(GameState *game, RenderTexture2D lightTexture, RenderTexture2D sha
     drawRoomTiles(game);
 
     // draw edge visualizations
-    for (int i = 0; i < game->roomEdgeCount; i++)
-    {
-        Edge currEdge = game->roomEdges[i];
-        // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
-        // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
-        DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
-    }
+    // for (int i = 0; i < game->roomEdgeCount; i++)
+    // {
+    //     Edge currEdge = game->roomEdges[i];
+    //     // DrawCircle(currEdge.start.x, currEdge.start.y, 5, RED);
+    //     // DrawCircle(currEdge.end.x, currEdge.end.y, 5, RED);
+    //     DrawLine(currEdge.start.x, currEdge.start.y, currEdge.end.x, currEdge.end.y, RED);
+    // }
 
     // draw player
     DrawRectangle(game->player->playerPos.x, game->player->playerPos.y, game->player->playerSize.x, game->player->playerSize.y, WHITE);

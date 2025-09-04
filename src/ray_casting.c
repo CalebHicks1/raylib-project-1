@@ -261,9 +261,10 @@ Triangle *calculatePlayerSight(GameState *game, float sightRange)
 
     // printf("calculatePlayerSight: edgeCount=%d, sightRange=%.1f\n", game->roomEdgeCount, sightRange);
 
+    // Draw light at player's feet
     Vector2 playerCenter = {
         game->player->playerPos.x + game->player->playerSize.x / 2,
-        game->player->playerPos.y + game->player->playerSize.y / 2};
+        game->player->playerPos.y + game->player->playerSize.y};
 
     // Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), game->playerCamera->camera);
 

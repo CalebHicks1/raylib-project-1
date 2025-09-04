@@ -17,7 +17,7 @@ void InitGame(GameState *game)
     game->tileTextures[TILE_WALL] = LoadTexture("resources/wall.png");
     game->tileTextures[TILE_FLOOR] = LoadTexture("resources/floor.png");
 
-    loadRoomTiles(game, 32, 32);
+    loadRoomTiles(game, 16, 16);
     // calculate edges of tiles
     roomTilesToRoomLines(game);
 }
@@ -44,9 +44,9 @@ void InitPlayer(GameState *game)
 {
     game->player = malloc(sizeof(Player));
 
-    game->player->playerPos = (Vector2){0.0f, 0.0f};
+    game->player->playerPos = (Vector2){200, 200};
     game->player->playerSpeed = 200.0f;
     game->player->playerVelocity = (Vector2){0.0f, 0.0f};
     game->player->playerTargetVelocity = (Vector2){0.0f, 0.0f};
-    game->player->playerSize = (Vector2){50, 50};
+    game->player->playerSize = (Vector2){16, 32};
 }
